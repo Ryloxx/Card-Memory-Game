@@ -51,6 +51,7 @@ export class Difficulty {
 export class Model {
   cach = {};
   #cards;
+  select1;
   constructor(difficulty) {
     this.difficulty = difficulty;
     switch (this.difficulty) {
@@ -77,8 +78,8 @@ export class Model {
     let types = CardType.types;
     for (let i = 0; i < Math.floor(cardCount / 2); i++) {
       let randomIndex = Math.floor(Math.random() * types.length);
-      res.push(types[randomIndex]);
-      res.push(types[randomIndex]);
+      res.push(this.cardFact(types[randomIndex]));
+      res.push(this.cardFact(types[randomIndex]));
     }
     return res;
   }
@@ -91,5 +92,49 @@ export class Model {
     }
     this.cach.cards = Object.freeze(this.#cards);
     return this.cach.cards;
+  }
+  cardFact(type) {
+    return {
+      type: type,
+      selected: false,
+      discarded: false,
+    };
+  }
+  selectCard(card) {
+    if (card.discarded) {
+      return;
+    }
+    console.log(`Card ${card.type.name} selected`);
+    card.selected = true;
+    if (this.select1) {
+      if (card !== this.select1) {
+        if (card.type === this.select1.type) {
+          console.log(
+            `Pair of ${this.select1.type.name} has been succsessfuly selected.`
+          );
+          card.discarded = true;
+          this.select1.discarded = true;
+          this.checkEnd();
+        } else {
+          console.log(
+            `Pair of ${this.select1.type.name}  and ${card.type.name} does not match.`
+          );
+        }
+        this.select1.selected = false;
+        card.selected = false;
+        this.select1 = undefined;
+      }
+    } else {
+      this.select1 = card;
+    }
+  }
+  checkEnd() {
+    if (
+      this.#cards.reduce((a, b) => {
+        return a && b.discarded;
+      }, true)
+    ) {
+      console.log("GAME OVER");
+    }
   }
 }

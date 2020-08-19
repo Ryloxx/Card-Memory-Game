@@ -12,3 +12,9 @@ body {
 head {
   background-color: aliceblue;
 }
+#game{
+    min-width: 500px;
+    min-height: 500px;
+    overflow: hidden;
+}
+
