@@ -16,10 +16,7 @@ export class View {
    * @param {string} eventTriggerName - String wich will be used to create the event trigger
    */
   displayCards(cardList, eventTriggerName) {
-    while (this.viewElem.firstChild) {
-      this.viewElem.removeChild(this.viewElem.firstChild);
-    }
-    this.cards = [];
+    this.reset();
     this.viewElem.setAttribute("class", "container-fluid row");
     let n = Math.floor(Math.sqrt(cardList.length));
     cardList = this.shuffle(cardList);
@@ -104,16 +101,18 @@ export class View {
     cardView.cardElem.textContent = cardView.card.type.name;
   }
   /**
-   * Prompt the game over
+   * Prompt a message, meant to be used when the game is over
+   * @param {string} message - Message to display
    */
-  displayEnd() {
-    alert("GAME OVER");
+  displayEnd(message) {
+    alert(message);
   }
   /**
    * Display button to get the difficulty of the game
    * @param {string} eventTriggerName - Event to trigger when a difficulty button is pressed
    */
   askDifficulty(eventTriggerName) {
+    this.reset();
     for (let difficulty of Difficulty.types) {
       let difficultyButton = {
         difficultyButtonElem: document.createElement("button"),
@@ -129,6 +128,10 @@ export class View {
       );
     }
   }
+  /**
+   * The handler for the difficulty button click
+   * @param {string} eventTriggerName Event to trigger inside the handler
+   */
   difficultyButtonHandler(eventTriggerName) {
     let customEvent = new CustomEvent(eventTriggerName, {
       bubbles: true,
@@ -137,5 +140,86 @@ export class View {
       },
     });
     this.difficultyButtonElem.dispatchEvent(customEvent);
+  }
+  /**
+   * Reset the view components
+   */
+  reset() {
+    while (this.viewElem.firstChild) {
+      this.viewElem.removeChild(this.viewElem.firstChild);
+    }
+    this.cards = [];
+    this.viewElem.setAttribute("class", "");
+  }
+}
+
+export class Timer {
+  timer = 0;
+  running = false;
+  constructor(timerSelector) {
+    this.timerElem = document.querySelector(timerSelector);
+    setInterval(() => {
+      this.update();
+    }, 1000);
+    this.timerElem.textContent = this.formatIntToMinSec(this.timer);
+  }
+  /**
+   * Format an integer to a minute second string "xx:xx"
+   * @param {number} intTime The integer to format
+   */
+  formatIntToMinSec(intTime) {
+    intTime = Math.floor(intTime);
+    let sec = intTime % 60;
+    let min = intTime - sec;
+    min = min <= 9 ? "0" + min : String(min);
+    sec = sec <= 9 ? "0" + sec : String(sec);
+    return `${min}:${sec}`;
+  }
+  /**
+   * Start the timer
+   */
+  start() {
+    this.running = true;
+  }
+  /**
+   * Reset the timer
+   */
+  reset() {
+    this.running = false;
+    this.timer = 0;
+    this.updateView();
+  }
+  /**
+   * Stop the timer
+   */
+  stop() {
+    this.running = false;
+  }
+  /**
+   * Update the timer
+   */
+  update() {
+    if (this.running) {
+      this.timer += 1;
+      this.updateView();
+    }
+  }
+  /**
+   * Return the min part of the timer
+   */
+  getMin() {
+    return this.timer - this.getSec();
+  }
+  /**
+   * Return the seconds part of the timer
+   */
+  getSec() {
+    return this.timer % 60;
+  }
+  /**
+   * Update the view of the timer
+   */
+  updateView() {
+    this.timerElem.textContent = this.formatIntToMinSec(this.timer);
   }
 }
