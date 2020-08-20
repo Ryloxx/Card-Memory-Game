@@ -3,15 +3,16 @@ import { View, Timer } from "./view.js";
 const view = new View("#game");
 const timer = new Timer("#timer");
 var interaction = true;
+var game;
 //Ask game difficulty
 view.askDifficulty("difficultyClick");
 
 //Listen for the response
 window.addEventListener("difficultyClick", (event) => {
   let difficulty = event.detail.chosenDifficulty;
-  //Initialize the game with the chosen difficulty
-  const game = new Model(difficulty);
-  //Display the card
+  //Initialize a game with the chosen difficulty
+  game = new Model(difficulty);
+  //Display the cards
   view.displayCards(game.cards, "cardClick");
   //Start the timer
   timer.start();
@@ -29,19 +30,20 @@ window.addEventListener("difficultyClick", (event) => {
         setTimeout(() => {
           game.selectCard(cardView.card);
           view.update();
+          //Check if the game is over
           if (game.getResult()) {
             //Stop the timer and display it
             timer.stop();
-            let min = timer.getMin();
-            let sec = timer.getSec();
-            min = min > 0 ? min + "minutes" : "";
-            sec = (min > 0 ? `and ${sec}` : sec) + " seconds.";
-            view.displayEnd(`You finished in ${min} ${sec}`);
+            view.displayEnd(
+              `You finished in ${Timer.formatIntToMinSec(timer.timer)}`
+            );
+            //Update the best score
+            view.updateBestScore(game.getDifficulty().name, timer.timer);
             timer.reset();
             view.askDifficulty("difficultyClick");
           }
           interaction = true;
-        }, 1000);
+        }, 500);
       } else {
         //Else just update directly
         game.selectCard(cardView.card);

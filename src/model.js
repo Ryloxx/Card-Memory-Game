@@ -50,7 +50,7 @@ export class Difficulty {
  * Game engine
  */
 export class Model {
-  cach = {};
+  cache = {};
   #cards;
   select1;
   /**
@@ -76,14 +76,14 @@ export class Model {
     return res;
   }
   /**
-   * Return an immutable array of the currently selected cards for the game
+   * Return an immutable array of the cards for the game
    */
   get cards() {
-    if ("cards" in this.cach) {
-      return this.cach.cards;
+    if ("cards" in this.cache) {
+      return this.cache.cards;
     }
-    this.cach.cards = Object.freeze(this.#cards);
-    return this.cach.cards;
+    this.cache.cards = Object.freeze(this.#cards);
+    return this.cache.cards;
   }
   /**
    * Create a valid card for the game
@@ -104,21 +104,14 @@ export class Model {
     if (card.discarded) {
       return card;
     }
-    //console.log(`Card ${card.type.name} selected`);
+
     card.selected = true;
     if (this.select1) {
       if (card !== this.select1) {
         if (card.type === this.select1.type) {
-          //console.log(
-          // `Pair of ${this.select1.type.name} has been succsessfuly selected.`
-          //);
           card.discarded = true;
           this.select1.discarded = true;
-          this.checkEnd();
         } else {
-          //console.log(
-          //  `Pair of ${this.select1.type.name}  and ${card.type.name} does not match.`
-          // );
         }
         this.select1.selected = false;
         card.selected = false;
@@ -148,5 +141,11 @@ export class Model {
    */
   getResult() {
     return this.checkEnd();
+  }
+  /**
+   * Return the difficulty of the game
+   */
+  getDifficulty() {
+    return this.difficulty;
   }
 }
