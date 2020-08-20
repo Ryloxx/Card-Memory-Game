@@ -31,12 +31,13 @@ export class CardType {
  * Different difficulty of the game
  */
 export class Difficulty {
-  static EASY = Object.freeze(new Difficulty("EASY"));
-  static MEDIUM = Object.freeze(new Difficulty("MEDIUM"));
-  static HARD = Object.freeze(new Difficulty("HARD"));
+  static EASY = Object.freeze(new Difficulty("EASY", 4));
+  static MEDIUM = Object.freeze(new Difficulty("MEDIUM", 16));
+  static HARD = Object.freeze(new Difficulty("HARD", 36));
   static types = Difficulty.getTypes();
-  constructor(name) {
+  constructor(name, cardCount) {
     this.name = name;
+    this.cardCount = cardCount;
   }
   toString() {
     return `Difficulty.${this.name}`;
@@ -52,22 +53,13 @@ export class Model {
   cach = {};
   #cards;
   select1;
+  /**
+   * Initiate a new game with the specified difficulty.
+   * @param {Difficulty} difficulty - The difficulty
+   */
   constructor(difficulty) {
     this.difficulty = difficulty;
-    switch (this.difficulty) {
-      case Difficulty.EASY:
-        this.cardCount = 4 * 4;
-        break;
-      case Difficulty.MEDIUM:
-        this.cardCount = 6 * 6;
-        break;
-      case Difficulty.HARD:
-        this.cardCount = 8 * 8;
-        break;
-      default:
-        throw Error("Difficulty not supported");
-    }
-    this.#cards = this.createRandomCards(this.cardCount);
+    this.#cards = this.createRandomCards(difficulty.cardCount);
   }
   /**
    * Create an array of random selected card from the CardType enum
@@ -93,6 +85,10 @@ export class Model {
     this.cach.cards = Object.freeze(this.#cards);
     return this.cach.cards;
   }
+  /**
+   * Create a valid card for the game
+   * @param {CardType} type - The card type
+   */
   cardFact(type) {
     return {
       type: type,
@@ -100,25 +96,29 @@ export class Model {
       discarded: false,
     };
   }
+  /**
+   * Select the specifed card and update the game state
+   * @param {cardFact()} card - The selected card
+   */
   selectCard(card) {
     if (card.discarded) {
-      return;
+      return card;
     }
-    console.log(`Card ${card.type.name} selected`);
+    //console.log(`Card ${card.type.name} selected`);
     card.selected = true;
     if (this.select1) {
       if (card !== this.select1) {
         if (card.type === this.select1.type) {
-          console.log(
-            `Pair of ${this.select1.type.name} has been succsessfuly selected.`
-          );
+          //console.log(
+          // `Pair of ${this.select1.type.name} has been succsessfuly selected.`
+          //);
           card.discarded = true;
           this.select1.discarded = true;
           this.checkEnd();
         } else {
-          console.log(
-            `Pair of ${this.select1.type.name}  and ${card.type.name} does not match.`
-          );
+          //console.log(
+          //  `Pair of ${this.select1.type.name}  and ${card.type.name} does not match.`
+          // );
         }
         this.select1.selected = false;
         card.selected = false;
@@ -127,14 +127,26 @@ export class Model {
     } else {
       this.select1 = card;
     }
+    return card;
   }
+  /**
+   * Check if the game is over
+   */
   checkEnd() {
-    if (
-      this.#cards.reduce((a, b) => {
-        return a && b.discarded;
-      }, true)
-    ) {
-      console.log("GAME OVER");
-    }
+    return this.#cards.reduce((a, b) => {
+      return a && b.discarded;
+    }, true);
+  }
+  /**
+   * Return if the game has already one card selected
+   */
+  alreadySelectedOne() {
+    return Boolean(this.select1);
+  }
+  /**
+   * Return if the game is over.
+   */
+  getResult() {
+    return this.checkEnd();
   }
 }

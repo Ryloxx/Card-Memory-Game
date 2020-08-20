@@ -1,4 +1,5 @@
 import { CardType } from "./model.js";
+import { Difficulty } from "./model.js";
 export class View {
   cards = [];
   /**
@@ -33,7 +34,7 @@ export class View {
         cardView.cardElem.addEventListener("click", (event) => {
           this.clickHandler.call(cardView, eventTriggerName);
         });
-        cardView.cardElem.setAttribute("class", "btn");
+        cardView.cardElem.setAttribute("class", "btn-block");
       }
       this.viewElem.appendChild(container);
     }
@@ -68,6 +69,9 @@ export class View {
     }
     return res;
   }
+  /**
+   * Update the view with the latest modification to the cards
+   */
   update() {
     for (let cardView of this.cards) {
       if (cardView.card.discarded) {
@@ -75,17 +79,63 @@ export class View {
         continue;
       }
       if (cardView.card.selected) {
-        cardView.cardElem.textContent = cardView.card.name;
+        cardView.cardElem.textContent = cardView.card.type.name;
+        cardView.faceup = true;
         continue;
       }
       cardView.cardElem.textContent = "*";
     }
   }
+  /**
+   * Return a valid CardView object which represent a card to render.
+   * @param {CardType} card The card to render
+   */
   cardViewFact(card) {
     return {
       cardElem: document.createElement("button"),
       card: card,
-      faceup: false,
     };
+  }
+  /**
+   * Face up the specified CardView
+   * @param {cardViewFact()} cardView - CardView to face up
+   */
+  faceupCard(cardView) {
+    cardView.cardElem.textContent = cardView.card.type.name;
+  }
+  /**
+   * Prompt the game over
+   */
+  displayEnd() {
+    alert("GAME OVER");
+  }
+  /**
+   * Display button to get the difficulty of the game
+   * @param {string} eventTriggerName - Event to trigger when a difficulty button is pressed
+   */
+  askDifficulty(eventTriggerName) {
+    for (let difficulty of Difficulty.types) {
+      let difficultyButton = {
+        difficultyButtonElem: document.createElement("button"),
+        difficulty: difficulty,
+      };
+      difficultyButton.difficultyButtonElem.textContent = difficulty.name;
+      this.viewElem.appendChild(difficultyButton.difficultyButtonElem);
+      difficultyButton.difficultyButtonElem.addEventListener(
+        "click",
+        (event) => {
+          this.difficultyButtonHandler.call(difficultyButton, eventTriggerName);
+        }
+      );
+    }
+  }
+  difficultyButtonHandler(eventTriggerName) {
+    let customEvent = new CustomEvent(eventTriggerName, {
+      bubbles: true,
+      detail: {
+        chosenDifficulty: this.difficulty,
+      },
+    });
+    this.difficultyButtonElem.dispatchEvent(customEvent);
   }
 }
