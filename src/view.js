@@ -13,10 +13,7 @@ export class View {
     this.gameViewElem = document.createElement("div");
     this.viewElem.appendChild(this.gameViewElem);
     this.viewElem.appendChild(this.gameSummaryViewElem);
-    this.viewElem.setAttribute(
-      "class",
-      " row my-auto bg-secondary rounded"
-    );
+    this.viewElem.setAttribute("class", " row my-auto bg-secondary rounded");
     this.gameViewElem.setAttribute(
       "class",
       "p-5 row col-9 my-auto  bg-warning rounded"
@@ -148,7 +145,10 @@ export class View {
         difficulty: difficulty,
       };
       difficultyButton.difficultyButtonElem.textContent = difficulty.name;
-      difficultyButton.difficultyButtonElem.setAttribute("class", "m-auto bnt rounded");
+      difficultyButton.difficultyButtonElem.setAttribute(
+        "class",
+        "m-auto bnt rounded"
+      );
       this.gameViewElem.appendChild(difficultyButton.difficultyButtonElem);
       difficultyButton.difficultyButtonElem.addEventListener(
         "click",
@@ -199,8 +199,10 @@ export class View {
     } else {
       if (scoreToUpdate.bestScoreForDiffValue === undefined) {
         res = score;
+        scoreToUpdate.bestScoreForDiffValue = res;
       } else {
-        res = Math.max(score, scoreToUpdate.bestScoreForDiffValue);
+        res = Math.min(score, scoreToUpdate.bestScoreForDiffValue);
+        scoreToUpdate.bestScoreForDiffValue = res;
       }
     }
     scoreToUpdate.bestScoreForDiffElem.textContent +=
