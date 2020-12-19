@@ -1,5 +1,5 @@
-import { CardType } from "./model.js";
-import { Difficulty } from "./model.js";
+import { CardType } from './model.js';
+import { Difficulty } from './model.js';
 export class View {
   cards = [];
   /**
@@ -9,28 +9,32 @@ export class View {
    */
   constructor(viewSelector) {
     this.viewElem = document.querySelector(viewSelector);
-    this.gameSummaryViewElem = document.createElement("div");
-    this.gameViewElem = document.createElement("div");
+    this.gameSummaryViewElem = document.createElement('div');
+    this.gameViewElem = document.createElement('div');
     this.viewElem.appendChild(this.gameViewElem);
     this.viewElem.appendChild(this.gameSummaryViewElem);
-    this.viewElem.setAttribute("class", " row my-auto bg-secondary rounded");
-    this.gameViewElem.setAttribute(
-      "class",
-      "p-5 row col-9 my-auto  bg-warning rounded"
+    this.viewElem.setAttribute(
+      'class',
+      'row my-auto rounded justify-content-center align-content-between',
     );
-    this.gameSummaryViewElem.setAttribute("class", " col  my-auto  rounded");
+    this.gameViewElem.setAttribute('class', 'game-view p-1 col-9');
+    this.gameSummaryViewElem.setAttribute('class', 'game-summary col rounded');
+    const timerElem = document.createElement('div');
+    timerElem.id = 'timer';
+    this.gameSummaryViewElem.appendChild(timerElem);
     this.bestScore = {};
     for (let type of Difficulty.types) {
       let bestScoreForDiff = {
-        bestScoreForDiffElem: document.createElement("div"),
+        bestScoreForDiffElem: document.createElement('div'),
         bestScoreForDiffValue: undefined,
       };
       this.gameSummaryViewElem.appendChild(
-        bestScoreForDiff.bestScoreForDiffElem
+        bestScoreForDiff.bestScoreForDiffElem,
       );
       this.bestScore[type.name] = bestScoreForDiff;
       this.updateBestScore(type.name);
     }
+
     //this.gameSummaryViewElem.textContent = "Best Time";
   }
   /**
@@ -44,17 +48,20 @@ export class View {
     let n = Math.floor(Math.sqrt(cardList.length));
     cardList = this.shuffle(cardList);
     for (let i = 0; i < n; i++) {
-      let container = document.createElement("div");
-      container.setAttribute("class", `container col-${12 / n}`);
+      let container = document.createElement('div');
+      container.setAttribute('class', `container`);
       for (let j = 0; j < n; j++) {
         let cardView = this.cardViewFact(cardList[i * n + j]);
         container.appendChild(cardView.cardElem);
         this.cards.push(cardView);
-
-        cardView.cardElem.addEventListener("click", (event) => {
+        const size = `${80 / n}vmin`;
+        cardView.cardElem.style.width = size;
+        cardView.cardElem.style.height = size;
+        cardView.cardElem.style.minWidth = size;
+        cardView.cardElem.style.minHeight = size;
+        cardView.cardElem.addEventListener('click', (event) => {
           this.clickHandler.call(cardView, eventTriggerName);
         });
-        cardView.cardElem.setAttribute("class", "btn-block rounded");
       }
       this.gameViewElem.appendChild(container);
     }
@@ -94,15 +101,11 @@ export class View {
    */
   update() {
     for (let cardView of this.cards) {
-      if (cardView.card.discarded) {
-        cardView.cardElem.textContent = "Found";
-        continue;
+      if (cardView.card.discarded || cardView.card.selected) {
+        this.faceupCard(cardView);
+      } else {
+        this.facedownCard(cardView);
       }
-      if (cardView.card.selected) {
-        cardView.cardElem.textContent = cardView.card.type.name;
-        continue;
-      }
-      cardView.cardElem.textContent = "*";
     }
   }
   /**
@@ -110,17 +113,26 @@ export class View {
    * @param {CardType} card The card to render.
    */
   cardViewFact(card) {
+    const cardElem = document.createElement('div');
+    cardElem.className = `${card.type.name} card`;
     return {
-      cardElem: document.createElement("button"),
+      cardElem,
       card: card,
     };
+  }
+  /**
+   * Face down the specified CardView.
+   * @param {cardViewFact()} cardView - CardView to face down.
+   */
+  facedownCard(cardView) {
+    cardView.cardElem.classList.remove('selected');
   }
   /**
    * Face up the specified CardView.
    * @param {cardViewFact()} cardView - CardView to face up.
    */
   faceupCard(cardView) {
-    cardView.cardElem.textContent = cardView.card.type.name;
+    cardView.cardElem.classList.add('selected');
   }
   /**
    * Prompt a message, meant to be used when the game is over.
@@ -135,28 +147,30 @@ export class View {
    */
   askDifficulty(eventTriggerName) {
     this.reset();
-    let difficultyLabel = document.createElement("div");
-    difficultyLabel.textContent = "Difficulty";
-    this.gameViewElem.appendChild(difficultyLabel);
-    difficultyLabel.setAttribute("class", "m-auto ");
+    const container = document.createElement('div');
+    container.className = 'difficulty container';
     for (let difficulty of Difficulty.types) {
       let difficultyButton = {
-        difficultyButtonElem: document.createElement("button"),
+        difficultyButtonElem: document.createElement('div'),
         difficulty: difficulty,
       };
       difficultyButton.difficultyButtonElem.textContent = difficulty.name;
       difficultyButton.difficultyButtonElem.setAttribute(
-        "class",
-        "m-auto bnt rounded"
+        'class',
+        'card difficulty',
       );
-      this.gameViewElem.appendChild(difficultyButton.difficultyButtonElem);
+      const size = `${90 / (Difficulty.types.length || 1)}vmin`;
+      difficultyButton.difficultyButtonElem.style.height = size;
+      difficultyButton.difficultyButtonElem.style.width = size;
+      container.appendChild(difficultyButton.difficultyButtonElem);
       difficultyButton.difficultyButtonElem.addEventListener(
-        "click",
+        'click',
         (event) => {
           this.difficultyButtonHandler.call(difficultyButton, eventTriggerName);
-        }
+        },
       );
     }
+    this.gameViewElem.appendChild(container);
   }
   /**
    * The handler for the difficulty button click.
@@ -185,14 +199,11 @@ export class View {
    * @param {string} difficultyName - Name of the difficulty to update.
    */
   updateBestScore(difficultyName, score) {
-    console.log(difficultyName);
-    console.log(this.bestScore);
     let scoreToUpdate = this.bestScore[difficultyName];
-    scoreToUpdate.bestScoreForDiffElem.textContent = difficultyName + ": ";
-    let res = "";
+    let res = '';
     if (isNaN(parseInt(score))) {
       if (scoreToUpdate.bestScoreForDiffValue === undefined) {
-        res = "/";
+        res = '/';
       } else {
         res = scoreToUpdate.bestScoreForDiffValue;
       }
@@ -205,8 +216,10 @@ export class View {
         scoreToUpdate.bestScoreForDiffValue = res;
       }
     }
-    scoreToUpdate.bestScoreForDiffElem.textContent +=
-      typeof res == "number" ? Timer.formatIntToMinSec(res) : res;
+    scoreToUpdate.bestScoreForDiffElem.innerHTML = `<span class='thin'>${difficultyName}:</span class='thin'><span class='strong'>
+    ${typeof res == 'number' ? Timer.formatIntToMinSec(res) : res}
+    </span>
+    `;
   }
 }
 
@@ -228,8 +241,8 @@ export class Timer {
     intTime = Math.floor(intTime);
     let sec = Timer.getSec(intTime);
     let min = Timer.getMin(intTime);
-    min = min <= 9 ? "0" + min : String(min);
-    sec = sec <= 9 ? "0" + sec : String(sec);
+    min = min <= 9 ? '0' + min : String(min);
+    sec = sec <= 9 ? '0' + sec : String(sec);
     return `${min}m:${sec}s`;
   }
   /**

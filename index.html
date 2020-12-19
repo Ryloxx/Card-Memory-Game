@@ -15,18 +15,182 @@
       integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z"
       crossorigin="anonymous"
     />
+    <style>
+      body {
+        font-size: calc(1vmax + 10px);
+        max-width: 100vw;
+        overflow-x: hidden;
+        min-height: 100vh;
+        position: relative;
+        background-color: rgba(255, 161, 67, 0.8);
+        padding: 2rem;
+      }
+      body::after {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        z-index: -1;
+        content: '';
+        clip-path: circle(200% at 0% 100%);
+        background-color: rgba(255, 0, 0, 0.5);
+        background-image: radial-gradient(
+          rgba(255, 161, 67, 1) rgba(255, 161, 67, 0.5)
+        );
+        animation: onLoad 1s ease-out 0ms 1;
+      }
+      main {
+        height: 100%;
+        width: 100%;
+        animation: onLoad 1s ease-out 0ms 1;
+      }
+      footer {
+        font-size: calc(0.5vmax + 10px);
+      }
+
+      .game-summary {
+        display: flex;
+        flex-direction: column;
+        align-self: center;
+        padding: 2rem 1rem;
+        gap: 1vmax;
+      }
+      #timer {
+        text-align: center;
+        font-size: calc(3vmax + 10px);
+      }
+      .thin {
+        font-weight: 400;
+        font-size: calc(1vmax + 10px);
+      }
+      .strong {
+        font-weight: 600;
+        font-size: calc(1vmax +10px);
+      }
+      .game-view {
+        height: 90vmin;
+        width: 90vmin;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        place-content: center;
+        place-items: center;
+      }
+      .container {
+        display: flex;
+        place-content: center;
+        place-items: center;
+      }
+      .game-view,
+      .container {
+        gap: 1vmax;
+      }
+      .card {
+        color: white;
+        background-color: #3266a8;
+        background-repeat: no-repeat;
+        animation-name: face-down;
+        animation-duration: 200ms;
+        animation-play-state: running;
+        animation-iteration-count: 1;
+        animation-fill-mode: forwards;
+        animation-timing-function: cubic-bezier(0.47, 0, 0.745, 0.715);
+        background-position: center;
+        border-radius: 10px;
+        position: relative;
+      }
+
+      .card::after {
+        position: absolute;
+        content: '';
+        width: 100%;
+        height: 100%;
+        clip-path: circle(310% at -50% -200%);
+        top: 0;
+        left: 0;
+
+        background-color: rgba(255, 255, 255, 0.04);
+      }
+
+      .card.difficulty {
+        animation-name: none;
+        display: flex;
+        place-content: center;
+        place-items: center;
+        font-size: calc(2vmax + 10px);
+        min-width: fit-content;
+        padding: 1rem;
+        font-weight: 300;
+      }
+      .card.found,
+      .card.selected {
+        animation-name: face-up;
+      }
+      .PEACH {
+        background-image: url('./assets/images/peach.png');
+      }
+      .WATERMELON {
+        background-image: url('./assets/images/watermelon.png');
+      }
+      .APPLE {
+        background-image: url('./assets/images/apple.png');
+      }
+      .ORANGE {
+        background-image: url('./assets/images/orange.png');
+      }
+      .CHERRY {
+        background-image: url('./assets/images/cherry.png');
+      }
+      .BANANA {
+        background-image: url('./assets/images/banana.png');
+      }
+      @keyframes face-down {
+        0% {
+          transform: rotateX(0deg);
+          background-size: 60%;
+        }
+        50% {
+          transform: rotateX(90deg);
+          background-size: 60%;
+        }
+        51% {
+          background-size: 0;
+        }
+
+        to {
+          transform: rotateX(180deg);
+          background-size: 0;
+        }
+      }
+      @keyframes face-up {
+        0% {
+          transform: rotateX(180deg);
+          background-size: 0;
+        }
+        99% {
+          background-size: 0;
+        }
+
+        100% {
+          transform: rotateX(0deg);
+          background-size: 60%;
+        }
+      }
+      @keyframes onLoad {
+        from {
+          clip-path: circle(0% at 0% 0%);
+          border: 0;
+          opacity: 0;
+        }
+      }
+    </style>
   </head>
-  <body class="container-fluid text-center">
-    <header>
-      <h1 class="display-4">
-        Card Memory Game
-      </h1>
-    </header>
+  <body class="container-fluid">
     <main>
-      <div id="timer"></div>
       <div id="game"></div>
     </main>
-    <footer class="p-5">Designed by Rylox</footer>
+    <footer class="p-5 text-center">Designed by Rylox</footer>
     <script
       src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
       integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
